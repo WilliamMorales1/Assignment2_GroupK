@@ -8,22 +8,39 @@ public class BookOrder {
     public static void main(String[] args) {
         AVLTree tree = new AVLTree();
         
-        // Step 1: Read data from orders.csv and insert into the tree.
+        // Step 1: Ask the user to enter the file path
+        Scanner inputScanner = new Scanner(System.in);
+        System.out.print("Please enter the file path for orders.csv (without quotes): "); // C:\Users\wsm52\Downloads\orders.csv for me
+        String filePath = inputScanner.nextLine();
+        
+        // Step 2: Read data from the user-provided file path and insert into the tree
         try {
-            Scanner scanner = new Scanner(new File("orders.csv"));
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                String[] parts = line.split(",");
-                int orderID = Integer.parseInt(parts[0]);
-                String bookName = parts[1];
-                tree.insert(orderID, bookName);
+            Scanner fileScanner = new Scanner(new File(filePath));
+            
+            // Skip the first line (header)
+            if (fileScanner.hasNextLine()) {
+                fileScanner.nextLine();
             }
-            scanner.close();
+
+            // Read and process each line
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine();
+                String[] parts = line.split(","); // Use tab as the delimiter based on your CSV format
+
+                int orderID = Integer.parseInt(parts[0].trim());
+                String bookName = parts[1].trim();
+                
+                // Assuming tree is already defined somewhere
+                tree.insert(orderID, bookName); // Replace this with your actual tree insert code
+            }
+            fileScanner.close();
         } catch (Exception e) {
             System.out.println("Error reading file: " + e.getMessage());
         }
         
-        // Step 2: User menu
+        inputScanner.close();
+        
+        // Step 3: User menu
         Scanner input = new Scanner(System.in);
         while (true) {
             System.out.println("\n--- Bookstore Order Management ---");
