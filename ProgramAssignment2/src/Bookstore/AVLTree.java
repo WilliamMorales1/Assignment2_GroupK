@@ -25,6 +25,16 @@ public class AVLTree {
     private int height(Node n) {
         return (n == null) ? 0 : n.nodeheight;
     }
+    
+    // Count the total number of nodes in the tree
+    public int getNodeCount() {
+        return countNodes(root);
+    }
+
+    private int countNodes(Node node) {
+        if (node == null) return 0;
+        return 1 + countNodes(node.left) + countNodes(node.right);
+    }
 
     // Helper function to get maximum of two integers
     private int max(int a, int b) {
