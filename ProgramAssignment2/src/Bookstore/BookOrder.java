@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
+// NOTE TO SELF: doesn't actually save the changes made into the csv, im not sure if he wants us to do that though
+
 public class BookOrder {
     public static void main(String[] args) {
         AVLTree tree = new AVLTree();
@@ -14,27 +16,33 @@ public class BookOrder {
         String filePath = inputScanner.nextLine();
 
         // Step 2: Read data from the user-provided file path and insert into the tree
-        try {
-            Scanner fileScanner = new Scanner(new File(filePath));
+        boolean validFile = false;
+        while (!validFile) {
+            try {
+                Scanner fileScanner = new Scanner(new File(filePath));
 
-            // Skip the first line (header)
-            if (fileScanner.hasNextLine()) {
-                fileScanner.nextLine();
+                // Skip the first line (header)
+                if (fileScanner.hasNextLine()) {
+                    fileScanner.nextLine();
+                }
+
+                // Read and process each line
+                while (fileScanner.hasNextLine()) {
+                    String line = fileScanner.nextLine();
+                    String[] parts = line.split(","); // Assuming the CSV is comma-separated
+
+                    int orderID = Integer.parseInt(parts[0].trim());
+                    String bookName = parts[1].trim();
+
+                    tree.insert(orderID, bookName);
+                }
+                fileScanner.close();
+                validFile = true; // File was read successfully, exit loop
+            } catch (Exception e) {
+                System.out.println("Error reading file: " + e.getMessage());
+                System.out.print("Please enter a valid file path for orders.csv (without quotes): ");
+                filePath = inputScanner.nextLine();
             }
-
-            // Read and process each line
-            while (fileScanner.hasNextLine()) {
-                String line = fileScanner.nextLine();
-                String[] parts = line.split(","); // Assuming the CSV is comma-separated
-
-                int orderID = Integer.parseInt(parts[0].trim());
-                String bookName = parts[1].trim();
-
-                tree.insert(orderID, bookName);
-            }
-            fileScanner.close();
-        } catch (Exception e) {
-            System.out.println("Error reading file: " + e.getMessage());
         }
 
         // Step 3: User menu
@@ -47,6 +55,7 @@ public class BookOrder {
             System.out.println("5. Find oldest order");
             System.out.println("6. Find latest order");
             System.out.println("7. Exit");
+            System.out.println("----------------------------------");
 
             int choice = -1;
             try {
@@ -72,7 +81,7 @@ public class BookOrder {
                         tree.insert(newOrderID, newBookName);
                         System.out.println("Order added successfully.");
                     } catch (InputMismatchException e) {
-                        System.out.println("Invalid input. Order ID should be an integer.");
+                        System.out.println("Invalid input. Order ID should be an integer. Please try again.");
                         inputScanner.nextLine(); // Consume invalid input
                     }
                     break;
@@ -83,11 +92,17 @@ public class BookOrder {
                         System.out.print("Enter Order ID to remove: ");
                         int removeOrderID = inputScanner.nextInt();
                         inputScanner.nextLine(); // Consume newline
-
-                        tree.delete(removeOrderID);
-                        System.out.println("Order removed successfully (if it existed).");
+                        
+                        String bookName = tree.search(removeOrderID);
+                        if (bookName != null) {
+                            System.out.println("Order found with ID: " + removeOrderID + ", Book: " + bookName);
+                            tree.delete(removeOrderID);
+                            System.out.println("Order removed successfully.");
+                        } else {
+                            System.out.println("Order not found.");
+                        }
                     } catch (InputMismatchException e) {
-                        System.out.println("Invalid input. Order ID should be an integer.");
+                        System.out.println("Invalid input. Order ID should be an integer. Please try again.");
                         inputScanner.nextLine(); // Consume invalid input
                     }
                     break;
@@ -112,7 +127,7 @@ public class BookOrder {
                             System.out.println("Order not found.");
                         }
                     } catch (InputMismatchException e) {
-                        System.out.println("Invalid input. Order ID should be an integer.");
+                        System.out.println("Invalid input. Order ID should be an integer. Please try again.");
                         inputScanner.nextLine(); // Consume invalid input
                     }
                     break;
@@ -146,8 +161,11 @@ public class BookOrder {
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
-
-            // Print tree metrics: height
+            
+            // Print number of nodes
+            int nodeCount = tree.getNodeCount();
+            System.out.println("Number of nodes: " + nodeCount);
+            // Print tree height
             int treeHeight = tree.getHeight();
             System.out.println("Tree height: " + treeHeight);
         }
