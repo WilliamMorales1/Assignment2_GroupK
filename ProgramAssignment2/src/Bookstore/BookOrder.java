@@ -10,12 +10,11 @@ public class BookOrder {
     public static void main(String[] args) {
         AVLTree tree = new AVLTree();
 
-        // Step 1: Ask the user to enter the file path
+        // Step 1: Assume that the CSV file is in the same folder as the Java files
         Scanner inputScanner = new Scanner(System.in);
-        System.out.print("Please enter the file path for orders.csv (without quotes): "); // My path is C:\CodeStuff\CSC3102\orders.csv
-        String filePath = inputScanner.nextLine();
+        String filePath = "orders.csv";
 
-        // Step 2: Read data from the user-provided file path and insert into the tree
+        // Step 2: Read data from the user-provided file path if the csv could not be found and insert into the tree
         boolean validFile = false;
         while (!validFile) {
             try {
@@ -39,8 +38,10 @@ public class BookOrder {
                 fileScanner.close();
                 validFile = true; // File was read successfully, exit loop
             } catch (Exception e) {
-                System.out.println("Error reading file: " + e.getMessage());
-                System.out.print("Please enter a valid file path for orders.csv (without quotes): ");
+                System.out.println("The csv file could not be found: " + e.getMessage());
+                System.out.print("Please place orders.csv directly in the root directory of your project "
+                		+ "(the main project folder, not inside src or any package) and rerun the program."
+                		+ "\nIf the above does not work, please enter a valid file path for orders.csv (without quotes): ");
                 filePath = inputScanner.nextLine();
             }
         }
