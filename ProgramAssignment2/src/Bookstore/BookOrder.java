@@ -1,6 +1,7 @@
 package Bookstore;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
@@ -10,14 +11,13 @@ public class BookOrder {
 
         // Step 1: Assume that the CSV file is in the same folder as the Java files
         Scanner inputScanner = new Scanner(System.in);
-        String filePath = "orders.csv";
-
-        // Step 2: Read data from the user-provided file path if the csv could not be found and insert into the tree
+        String filePath = "src/Bookstore/orders.csv";
+        
+        // If the file could not be found
         boolean validFile = false;
         while (!validFile) {
-            try {
-                Scanner fileScanner = new Scanner(new File(filePath));
-
+            try (Scanner fileScanner = new Scanner(new File(filePath))) {
+                
                 // Skip the first line (header)
                 if (fileScanner.hasNextLine()) {
                     fileScanner.nextLine();
@@ -28,19 +28,27 @@ public class BookOrder {
                     String line = fileScanner.nextLine();
                     String[] parts = line.split(","); // Assuming the CSV is comma-separated
 
-                    int orderID = Integer.parseInt(parts[0].trim());
-                    String bookName = parts[1].trim();
+                    // Parse and insert orderID and bookName
+                    try {
+                        int orderID = Integer.parseInt(parts[0].trim());
+                        String bookName = parts[1].trim();
 
-                    tree.insert(orderID, bookName);
+                        // Insert into AVL tree
+                        tree.insert(orderID, bookName);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Skipping invalid line (orderID is not an integer): " + line);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("Skipping invalid line (missing fields): " + line);
+                    }
                 }
-                fileScanner.close();
-                validFile = true; // File was read successfully, exit loop
-            } catch (Exception e) {
-                System.out.println("The csv file could not be found: " + e.getMessage());
-                System.out.print("Please place orders.csv directly in the root directory of your project "
-                		+ "(the main project folder, not inside src or any package) and rerun the program."
-                		+ "\nIf the above does not work, please enter a valid file path for orders.csv (without quotes): ");
+                validFile = true; // File read successfully, exit loop
+
+            } catch (FileNotFoundException e) {
+                System.out.println("The CSV file could not be found: " + e.getMessage());
+                System.out.print("Please enter a valid file path for orders.csv (without quotes): ");
                 filePath = inputScanner.nextLine();
+            } catch (Exception e) {
+                System.out.println("An unexpected error occurred: " + e.getMessage());
             }
         }
 
