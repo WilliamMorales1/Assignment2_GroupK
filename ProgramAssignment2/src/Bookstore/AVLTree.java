@@ -15,17 +15,22 @@ public class AVLTree {
     }
 
     private Node root;
-    
+
     // Method to return the height of the tree
     public int getHeight() {
         return height(root);
     }
 
     // Helper function to get the height of a node
-    private int height(Node n) {
-        return (n == null) ? 0 : n.nodeheight;
+    private int height(Node node) {
+        return (node == null) ? 0 : node.nodeheight;
     }
     
+    // Helper function to update the height of a node
+    public void updateHeight(Node node) {
+    	node.nodeheight = max(height(node.left), height(node.right)) + 1;
+    }
+
     // Count the total number of nodes in the tree
     public int getNodeCount() {
         return countNodes(root);
@@ -42,42 +47,42 @@ public class AVLTree {
     }
 
     // Right rotation (single rotation)
-    private Node rightRotate(Node y) {
-        Node x = y.left;
-        Node T2 = x.right;
-
+    private Node rightRotate(Node x) {
+        Node y = x.left;
+        Node temp = y.right;
+        
         // Perform rotation
-        x.right = y;
-        y.left = T2;
-
+        y.right = x;
+        x.left = temp;
+        
         // Update heights
-        y.nodeheight = max(height(y.left), height(y.right)) + 1;
-        x.nodeheight = max(height(x.left), height(x.right)) + 1;
-
+        updateHeight(x);
+        updateHeight(y);
+        
         // Return new root
-        return x;
+        return y;
     }
 
     // Left rotation (single rotation)
     private Node leftRotate(Node x) {
         Node y = x.right;
-        Node T2 = y.left;
+        Node temp = y.left;
 
         // Perform rotation
         y.left = x;
-        x.right = T2;
+        x.right = temp;
 
         // Update heights
-        x.nodeheight = max(height(x.left), height(x.right)) + 1;
-        y.nodeheight = max(height(y.left), height(y.right)) + 1;
+        updateHeight(x);
+        updateHeight(y);
 
         // Return new root
         return y;
     }
 
     // Get balance factor of a node
-    private int getBalance(Node n) {
-        return (n == null) ? 0 : height(n.left) - height(n.right);
+    private int getBalance(Node node) {
+        return (node == null) ? 0 : height(node.left) - height(node.right);
     }
 
     // Insert method to add a new order
@@ -97,35 +102,11 @@ public class AVLTree {
         else
             return node; // Duplicate orderID is not allowed
 
-        // Update height of this ancestor node
-        node.nodeheight = 1 + max(height(node.left), height(node.right));
+        // Update height of the current node
+        updateHeight(node);
 
-        // Get the balance factor of this ancestor node
-        int balance = getBalance(node);
-
-        // If the node becomes unbalanced, there are 4 cases
-
-        // Left Left Case
-        if (balance > 1 && orderID < node.left.orderID)
-            return rightRotate(node);
-
-        // Right Right Case
-        if (balance < -1 && orderID > node.right.orderID)
-            return leftRotate(node);
-
-        // Left Right Case
-        if (balance > 1 && orderID > node.left.orderID) {
-            node.left = leftRotate(node.left);
-            return rightRotate(node);
-        }
-
-        // Right Left Case
-        if (balance < -1 && orderID < node.right.orderID) {
-            node.right = rightRotate(node.right);
-            return leftRotate(node);
-        }
-
-        return node;
+        // Balance the tree
+        return balanceTree(node);
     }
 
     // Search method to find a node by Order ID and return the book name
@@ -137,7 +118,7 @@ public class AVLTree {
         if (node == null) {
             return null; // Order ID not found
         }
-        
+
         if (orderID < node.orderID) {
             return search(node.left, orderID); // Search left subtree
         } else if (orderID > node.orderID) {
@@ -157,74 +138,55 @@ public class AVLTree {
         if (root == null)
             return root;
 
-        // If the order ID to be deleted is smaller than the root's order ID,
-        // then it lies in left subtree
         if (orderID < root.orderID)
             root.left = delete(root.left, orderID);
-
-        // If the order ID to be deleted is greater than the root's order ID,
-        // then it lies in right subtree
         else if (orderID > root.orderID)
             root.right = delete(root.right, orderID);
-
-        // If the key is same as root's key, then this is the node to be deleted
         else {
-            // Node with only one child or no child
+            // Node with one child or no child
             if ((root.left == null) || (root.right == null)) {
                 Node temp = (root.left != null) ? root.left : root.right;
-
-                // No child case
                 if (temp == null) {
                     temp = root;
                     root = null;
-                } else // One child case
+                } else
                     root = temp;
             } else {
-                // Node with two children: Get the inorder successor (smallest in the right subtree)
+                // Node with two children: Get the inorder successor
                 Node temp = findMinOrder(root.right);
 
-                // Copy the inorder successor's data to this node
                 root.orderID = temp.orderID;
                 root.bookName = temp.bookName;
 
-                // Delete the inorder successor
                 root.right = delete(root.right, temp.orderID);
             }
         }
 
-        // If the tree had only one node, then return
         if (root == null)
             return root;
+        
+        updateHeight(root);
 
-        // Update height of the current node
-        root.nodeheight = max(height(root.left), height(root.right)) + 1;
+        return balanceTree(root);
+    }
 
-        // Get the balance factor
-        int balance = getBalance(root);
+    // Helper to balance the tree after insert or delete
+    private Node balanceTree(Node node) {
+        int balance = getBalance(node);
 
-        // If the node becomes unbalanced, then there are 4 cases
-
-        // Left Left Case
-        if (balance > 1 && getBalance(root.left) >= 0)
-            return rightRotate(root);
-
-        // Left Right Case
-        if (balance > 1 && getBalance(root.left) < 0) {
-            root.left = leftRotate(root.left);
-            return rightRotate(root);
+        if (balance > 1) {
+            if (getBalance(node.left) < 0)
+                node.left = leftRotate(node.left);
+            return rightRotate(node);
         }
 
-        // Right Right Case
-        if (balance < -1 && getBalance(root.right) <= 0)
-            return leftRotate(root);
-
-        // Right Left Case
-        if (balance < -1 && getBalance(root.right) > 0) {
-            root.right = rightRotate(root.right);
-            return leftRotate(root);
+        if (balance < -1) {
+            if (getBalance(node.right) > 0)
+                node.right = rightRotate(node.right);
+            return leftRotate(node);
         }
 
-        return root;
+        return node;
     }
 
     // Find node with minimum order ID
@@ -257,7 +219,7 @@ public class AVLTree {
     private void inOrderTraversal(Node node) {
         if (node != null) {
             inOrderTraversal(node.left);
-            System.out.println("OrderID: " + node.orderID + ", Book: " + node.bookName);
+            System.out.println("Order ID: " + node.orderID + ", Book: " + node.bookName);
             inOrderTraversal(node.right);
         }
     }
