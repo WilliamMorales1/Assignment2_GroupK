@@ -7,15 +7,31 @@ import java.util.InputMismatchException;
 
 public class BookOrder {
     public static void main(String[] args) {
-        AVLTree tree = new AVLTree();
-
-        // Step 1: Assume that the CSV file is in the same folder as the Java files
+    	AVLTree tree = new AVLTree();
+    	
         Scanner inputScanner = new Scanner(System.in);
-        String filePath = "src/Bookstore/orders.csv";
+        String[] filePaths = {
+            "Bookstore/orders.csv",
+            "src/Bookstore/orders.csv",
+            "orders.csv"
+        };
         
-        // If the file could not be found
+        String filePath = null;
         boolean validFile = false;
+        int pathIndex = 0;
+
         while (!validFile) {
+            // Try each predefined file path first
+            if (pathIndex < filePaths.length) {
+                filePath = filePaths[pathIndex];
+                pathIndex++;
+            } else {
+                // After all predefined paths fail, prompt the user for input
+                System.out.print("Please enter a valid file path for orders.csv (without quotes) "
+                		+ "or type 'quit' to end the program.\n");
+                filePath = inputScanner.nextLine();
+            }
+
             try (Scanner fileScanner = new Scanner(new File(filePath))) {
                 
                 // Skip the first line (header)
@@ -44,13 +60,14 @@ public class BookOrder {
                 validFile = true; // File read successfully, exit loop
 
             } catch (FileNotFoundException e) {
-                System.out.println("The CSV file could not be found: " + e.getMessage());
-                System.out.print("Please enter a valid file path for orders.csv (without quotes): ");
-                filePath = inputScanner.nextLine();
+                System.out.println("The CSV file could not be found at: " + filePath
+                		+ "\nTrying a different path...");
             } catch (Exception e) {
                 System.out.println("An unexpected error occurred: " + e.getMessage());
             }
         }
+        
+        System.out.println("CSV file was found.");
 
         // Step 3: User menu
         while (true) {
