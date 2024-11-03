@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
-// NOTE TO SELF: doesn't actually save the changes made into the csv, im not sure if he wants us to do that though
-
 public class BookOrder {
     public static void main(String[] args) {
         AVLTree tree = new AVLTree();
@@ -69,24 +67,28 @@ public class BookOrder {
             }
 
             switch (choice) {
-                case 1:
-                    // Add new order
-                    try {
-                        System.out.print("Enter Order ID: ");
-                        int newOrderID = inputScanner.nextInt();
-                        inputScanner.nextLine(); // Consume newline
-
-                        System.out.print("Enter Book Name: ");
-                        String newBookName = inputScanner.nextLine();
-
-                        tree.insert(newOrderID, newBookName);
-                        System.out.println("Order added successfully.");
-                    } catch (InputMismatchException e) {
-                        System.out.println("Invalid input. Order ID should be an integer. Please try again.");
-                        inputScanner.nextLine(); // Consume invalid input
-                    }
-                    break;
-
+	            case 1:
+	                // Add new order
+	                try {
+	                    System.out.print("Enter Order ID: ");
+	                    int newOrderID = inputScanner.nextInt();
+	                    inputScanner.nextLine(); // Consume newline
+	
+	                    // Check if the Order ID already exists
+	                    if (tree.search(newOrderID) != null) {
+	                        System.out.println("Order ID already exists. Please enter a unique Order ID.");
+	                    } else {
+	                        System.out.print("Enter Book Name: ");
+	                        String newBookName = inputScanner.nextLine();
+	
+	                        tree.insert(newOrderID, newBookName);
+	                        System.out.println("Order added successfully.");
+	                    }
+	                } catch (InputMismatchException e) {
+	                    System.out.println("Invalid input. Order ID should be an integer. Please try again.");
+	                    inputScanner.nextLine(); // Consume invalid input
+	                }
+	                break;
                 case 2:
                     // Fulfill order (remove order)
                     try {
@@ -137,7 +139,7 @@ public class BookOrder {
                     // Find oldest order (minimum order ID)
                     AVLTree.Node minOrder = tree.findMinOrder();
                     if (minOrder != null) {
-                        System.out.println("Oldest order - OrderID: " + minOrder.orderID + ", Book: " + minOrder.bookName);
+                        System.out.println("Oldest order - Order ID: " + minOrder.orderID + ", Book: " + minOrder.bookName);
                     } else {
                         System.out.println("No orders found.");
                     }
@@ -147,7 +149,7 @@ public class BookOrder {
                     // Find latest order (maximum order ID)
                     AVLTree.Node maxOrder = tree.findMaxOrder();
                     if (maxOrder != null) {
-                        System.out.println("Latest order - OrderID: " + maxOrder.orderID + ", Book: " + maxOrder.bookName);
+                        System.out.println("Latest order - Order ID: " + maxOrder.orderID + ", Book: " + maxOrder.bookName);
                     } else {
                         System.out.println("No orders found.");
                     }
@@ -166,6 +168,7 @@ public class BookOrder {
             // Print number of nodes
             int nodeCount = tree.getNodeCount();
             System.out.println("Number of nodes: " + nodeCount);
+            
             // Print tree height
             int treeHeight = tree.getHeight();
             System.out.println("Tree height: " + treeHeight);
