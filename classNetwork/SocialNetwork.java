@@ -1,4 +1,4 @@
-package classNetworkTesting;
+package classNetwork;
 
 import java.util.List;
 import java.util.HashMap;
