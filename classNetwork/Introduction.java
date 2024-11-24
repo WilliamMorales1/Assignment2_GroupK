@@ -1,4 +1,4 @@
-package classNetworkTesting;
+package classNetwork;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,13 +12,13 @@ public class Introduction {
 
         Scanner scanner = new Scanner(System.in);
         String[] studentFilePaths = {
-            "classNetworkTesting/students.csv",
-            "CSC3102/classNetworkTesting/students.csv",
+            "classNetwork/students.csv",
+            "src/classNetwork/students.csv",
             "students.csv"
         };
         String[] networkFilePaths = {
-            "classNetworkTesting/network.csv",
-            "CSC3102/classNetworkTesting/network.csv",
+            "classNetwork/network.csv",
+            "src/classNetwork/network.csv",
             "network.csv"
         };
 
