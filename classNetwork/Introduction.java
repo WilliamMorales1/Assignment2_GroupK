@@ -2,6 +2,7 @@ package classNetwork;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -145,7 +146,7 @@ public class Introduction {
             }
         }
 
-        System.out.println("Files loaded successfully.");
+        System.out.println("Files loaded successfully!");
 
         // Choices Menu
         while (true) {
@@ -157,24 +158,74 @@ public class Introduction {
                     "5. Decrease wait days\n" +
                     "6. Exit\n" +
                     "-----------------------------------");
-            int choice = scanner.nextInt();
+            int choice = -1; // Initialize choice with a default value
+    	try {
+        System.out.print("Enter your choice: ");
+        choice = scanner.nextInt(); // Try to read an integer choice
+    	} catch (InputMismatchException e) {
+        System.out.println("Invalid input. Please enter a number between 1 and 6.");
+        scanner.nextLine(); // Clear the invalid input from the scanner
+        continue; // Skip the rest of the loop and prompt again
+    }
 
             switch (choice) {
                 case 1: // print network list for a student
-                    System.out.println("Enter student ID:");
-                    int studentId = scanner.nextInt();
-                    String firstName = network.getName(studentId);
-                    List<Integer> networkList = network.getNetworkList(studentId);
-                    System.out.println(firstName + "\'s Network list: " + networkList);
-                    break;
+ 		int studentId = -1;
+		   while (true){
+         		try{
+				System.out.print("Enter student ID: ");
+          			studentId = scanner.nextInt();
+            			String firstName = network.getName(studentId);
+		   		if (firstName == null){
+				 throw new NullPointerException("Student ID : " + studentId + "is not a valid ID number and cannot be found. Please retry.");                                } 
+				List<Integer> networkList = network.getNetworkList(studentId);
+                                System.out.println(firstName + "\'s Network list: " + networkList);
+                                break;}
+			catch (InputMismatchException e){
+            			System.out.println("Invalid input. Please enter a student ID with NUMBERS ONLY: ");
+            			scanner.nextLine();
+						}
+                        catch(NullPointerException e){
+				System.out.println("Student ID '" + studentId + "' is not a valid ID number. Please retry.");
+						}
+			 } break;
+				
+
+                                       
                 case 2: // find shortest path
-                    System.out.println("Enter start student ID:");
-                    int startId = scanner.nextInt();
-                    String startName = network.getName(startId);
-                    System.out.println("Enter end student ID:");
-                    int endId = scanner.nextInt();
-                    String endName = network.getName(endId);
-                    Map<Integer, Integer> result = network.findShortestPath(startId, endId);
+		    int startId = 0;
+		    int endId = 0;
+		    String startName;
+		    String endName;
+		   while(true){
+			try{
+		   	     System.out.println("Enter start student ID:");
+                             startId = scanner.nextInt();
+
+                             startName = network.getName(startId);
+		               if (startName == null){
+			      throw new NullPointerException("Student ID does not exist.");
+                                  } 
+//for END ID
+                              System.out.println("Enter end student ID:");
+       		 	      endId = scanner.nextInt(); // Read end student ID
+       	 		      endName = network.getName(endId);
+
+        		      if (endName == null) {
+            			throw new NullPointerException("End Student ID does not exist.");}
+				break;
+		    } catch(InputMismatchException e)
+		    { 
+			System.out.println("Invalid input, please enter NUMBERS ONLY: ");
+			scanner.nextLine();
+		    }
+ 		    catch(NullPointerException e)
+		    {
+                   	 System.out.println("Student ID inputted is not a valid ID number. Please retry.");
+		    }
+			  }
+//FINDS THE SHORTEST PATH NOW
+                        Map<Integer, Integer> result = network.findShortestPath(startId, endId);
                     if (result != null && !result.isEmpty()) {
                         int days = result.keySet().iterator().next();
                         int length = result.values().iterator().next();
@@ -184,34 +235,111 @@ public class Introduction {
                         System.out.println("No path found.");
                     }
                     break;
+//CASE THREE STARTS HERE: 
                 case 3: // disconnect student
+		int fromId = 0;
+		int toId = 0;
+		String fromName = null;
+		String toName = null;
+		while(true){
+		 try{
                     System.out.println("Enter source student ID:");
-                    int fromId = scanner.nextInt();
-                    String fromName = network.getName(fromId);
+                    fromId = scanner.nextInt();
+                    fromName = network.getName(fromId);
+		    if (fromName == null)
+		    {
+			throw new NullPointerException("This Student ID doesn't exist.");
+		     }
                     System.out.println("Enter target student ID:");
-                    int toId = scanner.nextInt();
-                    String toName = network.getName(toId);
+                    toId = scanner.nextInt();
+                    toName = network.getName(toId);
+		   if (toName == null)
+		   {
+			throw new NullPointerException("This Student ID doesn't exist.");} 
+		break;
+		  }catch(InputMismatchException e){
+			System.out.println("Invalid input, please enter NUMBERS ONLY: ");
+			scanner.nextLine();
+		  }catch(NullPointerException e){
+			System.out.println("This Student ID doesn't exist, please enter a valid ID.");
+			scanner.nextLine();
+		     }
+                  }	
                     network.disconnect(fromId, toId);
                     // rn it will still say "disconnected successfully" even if it did nothing
                     // needs to be fixed so it says something like "connection doesnt exist" if it doesn't
                     System.out.println("Disconnected " + fromName + " from " + toName + " successfully.");
                     break;
-                case 4: // increase wait days
-                    System.out.println("Enter student ID:");
-                    int studentIdInc = scanner.nextInt();
-                    System.out.println("Enter number of days to increase:");
-                    int daysInc = scanner.nextInt();
-                    network.modifyWaitDays(studentIdInc, daysInc, true);
+
+//CASE 4 = increase wait days
+                case 4: 
+		int studentIdDec = 0;
+		int daysInc = 0;
+		String studentName = null;
+			while(true){
+		    		try{
+                    	System.out.println("Enter student ID:");
+                    	studentIdDec = scanner.nextInt();
+			studentName = network.getName(studentIdDec);
+
+			if (studentName == null) 
+			{ throw new NullPointerException("This student ID doesn't exist.");
+			}
+
+                    	System.out.println("Enter number of days to increase:");
+                    	daysInc = scanner.nextInt();
+			if (daysInc < 0)
+			{
+			 throw new IllegalArgumentException("Number of days cannot be less than 0! Try again!"); }break; 
+			}catch(InputMismatchException e){
+				System.out.println("Invalid input, please enter NUMBERS ONLY: "); 
+				scanner.nextLine();
+			}catch (NullPointerException e){
+				System.out.println("Student ID doesn't exist, please try again.");	scanner.nextLine();
+			}catch(IllegalArgumentException e){
+				System.out.println("Number of days cannot be less than 0! Try again!");
+				scanner.nextLine();}
+		
+		      	 	}
+                      		
+
+                    network.modifyWaitDays(studentIdDec, daysInc, true);
                     System.out.println("Wait days increased.");
                     break;
+//CASE 5
                 case 5: // decrease wait days
-                    System.out.println("Enter student ID:");
-                    int studentIdDec = scanner.nextInt();
-                    System.out.println("Enter number of days to decrease:");
-                    int daysDec = scanner.nextInt();
+		    int stdudentIdDec = 0;
+		    int daysDec = 0;
+		    String studentName1 = null;
+
+	            while(true){
+		    try{
+                    	System.out.println("Enter student ID:");
+                    	studentIdDec = scanner.nextInt();
+			studentName1 = network.getName(studentIdDec);
+			if (studentName1 == null){
+			throw new NullPointerException("This student ID doesn't exist.");       }
+
+                    	System.out.println("Enter number of days to decrease:");
+                    daysDec = scanner.nextInt();
+		    if (daysDec < 0){
+			throw new IllegalArgumentException("Number of days cannot be less than 0! Try again.");} break;
+			} catch(InputMismatchException e){
+				System.out.println("Invalid input, please enter NUMBERS ONLY: ");
+				scanner.nextLine();
+			} catch(NullPointerException e){
+				System.out.println("This student ID doesnt exist, please try again");
+				scanner.nextLine();
+			} catch (IllegalArgumentException e){
+				System.out.println("Number of Days cannot be less than 0! Please try again");
+				scanner.nextLine();
+			}
+		}
+
                     network.modifyWaitDays(studentIdDec, daysDec, false);
                     System.out.println("Wait days decreased.");
                     break;
+//CASE 6
                 case 6: // exit
                     System.out.println("Exiting the program.");
                     scanner.close();
